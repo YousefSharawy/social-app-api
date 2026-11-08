@@ -21,8 +21,6 @@
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
     
-    // Recommended Options
-    "verbatimModuleSyntax": true,
     "noEmitOnError": true,
   },
   "include":[
