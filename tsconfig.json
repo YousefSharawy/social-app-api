@@ -12,7 +12,6 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,

@@ -1,0 +1,9 @@
+export enum Provider {
+  LOCAL,
+  GOOGLE,
+  FACEBOOK,
+}
+export enum Gender {
+  MALE,
+  FEMALE,
+}
