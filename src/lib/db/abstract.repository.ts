@@ -2,13 +2,13 @@ import { Model, QueryFilter, QueryOptions, Types } from "mongoose";
 //contract
 export abstract class AbstractRepository<T> {
   constructor(private readonly model: Model<T>) {}
-  async create(data: T) {
+  async create(data: Partial<T>) {
     return await this.model.create(data);
   }
   async update(
     filter: QueryFilter<T>,
     newData: Partial<T>,
-    options: QueryOptions<T>,
+    options?: QueryOptions<T>,
   ) {
     return await this.model.findOneAndUpdate(filter, newData, options);
   }

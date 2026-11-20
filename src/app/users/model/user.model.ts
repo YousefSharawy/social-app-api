@@ -6,7 +6,11 @@ export interface IUser {
   email: string;
   password: string;
   provider: number;
-  gender: number;
+  gender?: number;
+  isDeleted?: boolean;
+  isVerified?: boolean;
+  is2FactorAuthEnabled?: boolean;
+  
 }
 
 const schema = new Schema<IUser>({
@@ -21,7 +25,7 @@ const schema = new Schema<IUser>({
     type: String,
     required: true,
     trim: true,
-    minlength: 13,
+    minlength: 11,
     toLowerCase: true,
   },
   password: {
@@ -40,5 +44,17 @@ const schema = new Schema<IUser>({
     type: Number,
     enum: Gender,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  is2FactorAuthEnabled:{
+     type: Boolean,
+    default: false,
+  }
 });
 export const User = model("User", schema);

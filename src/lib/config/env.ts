@@ -5,6 +5,7 @@ const schema = z.object({
     PORT: z.string().default('3000'),
     DB_URL: z.string(),
     JWT_SECRET: z.string(),
+    JWT_REFRESH_SECRET: z.string(),
     REDIS_URL: z.string(),
     REDIS_HOST: z.string(),
     REDIS_PASSWORD: z.string(),
@@ -32,10 +33,12 @@ export const env = {
     //     password : parsed.SMTP_PASS,
     // },
     jwt: {
-        secret: parsed.JWT_SECRET
+        secret: parsed.JWT_SECRET,
+        refreshSecret: parsed.JWT_REFRESH_SECRET
+
     },
     google:{
-        webClietId:parsed.GOOGLE_WEB_CLIENT_ID
+        webClientId:parsed.GOOGLE_WEB_CLIENT_ID
     },
     mailjet: {
         apiKey: parsed.MAILJET_API_KEY,

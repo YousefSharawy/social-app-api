@@ -21,3 +21,11 @@ export interface VerifyAccountDTO {
     email:string,
     code:string,
 }
+export interface Enable2FactorAuthDTO {
+    email:string,
+    code:string,
+}
+export interface Verify2FactorAuthCodeToLoginDTO {
+    email:string,
+    code:string,
+}
