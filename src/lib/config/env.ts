@@ -15,6 +15,10 @@ const schema = z.object({
     MAILJET_FROM_NAME: z.string(),
     MAILJET_FROM_EMAIL: z.string(),
     GOOGLE_WEB_CLIENT_ID : z.string(),
+    SECRET_KEY : z.string(),
+    ACCESS_KEY : z.string(),
+    REGION : z.string(),
+    BUCKET_NAME:z.string()
 });
 const parsed = schema.parse(process.env);
 
@@ -27,6 +31,12 @@ export const env = {
         host: parsed.REDIS_HOST,
         port: Number(parsed.REDIS_PORT),
         password: parsed.REDIS_PASSWORD,
+    },
+    aws:{
+        secretKey: parsed.SECRET_KEY,
+        accessKey: parsed.ACCESS_KEY,
+        region:parsed.REGION,
+        bucketName : parsed.BUCKET_NAME
     },
     // nodemailer:{
     //     user : parsed.SMTP_USER,
