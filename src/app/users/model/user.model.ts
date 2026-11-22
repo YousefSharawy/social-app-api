@@ -9,8 +9,8 @@ export interface IUser {
   gender?: number;
   isDeleted?: boolean;
   isVerified?: boolean;
-  is2FactorAuthEnabled?: boolean;
-  
+  is2FactorAuthEnabled?: boolean,
+  profilePicturePath : string,
 }
 
 const schema = new Schema<IUser>({
@@ -55,6 +55,7 @@ const schema = new Schema<IUser>({
   is2FactorAuthEnabled:{
      type: Boolean,
     default: false,
-  }
+  },
+  profilePicturePath : String,
 });
 export const User = model("User", schema);

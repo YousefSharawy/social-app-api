@@ -1,4 +1,4 @@
-import { Model, QueryFilter, QueryOptions, Types } from "mongoose";
+import { Model, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
 //contract
 export abstract class AbstractRepository<T> {
   constructor(private readonly model: Model<T>) {}
@@ -7,7 +7,7 @@ export abstract class AbstractRepository<T> {
   }
   async update(
     filter: QueryFilter<T>,
-    newData: Partial<T>,
+    newData: UpdateQuery<T>,
     options?: QueryOptions<T>,
   ) {
     return await this.model.findOneAndUpdate(filter, newData, options);
