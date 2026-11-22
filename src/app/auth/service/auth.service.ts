@@ -183,6 +183,8 @@ class AuthService {
     } catch {
       throw new AppError("Invalid or expired refresh token", 401);
     }
+    const revoked = await cacheProvider.get(`revoked:${payload.jti}`); 
+    if (revoked) throw new AppError("Token has been revoked", 401);
     const user = await this.userRepo.getOne({ _id: payload.id });
     if (!user) throw new AppError("Invalid or expired refresh token", 401);
       return issueTokens(user);
