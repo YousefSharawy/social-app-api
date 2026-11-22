@@ -23,11 +23,12 @@ import { mailjetProvider } from "../../../lib/email/init";
 import { otpTemplate } from "../../../lib/email/otp.template";
 import { MailProvider } from "../../../pkg/mail/mail.interface";
 import { invalidCode, noPayload, otpIsExpired } from "../error";
-import { generateRefreshToken, generateToken } from "../../../lib/token/token";
+import { issueTokens } from "../../../lib/token/token";
 import { verifyGoogleToken } from "../../../lib/token/google.auth";
 import { Provider } from "../../../lib/enum/enum";
 import { env } from "../../../lib/config/env";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { AppError } from "../../../pkg/error/error";
 
 class AuthService {
   // private authService: AuthService = authService;
@@ -54,7 +55,7 @@ class AuthService {
       code,
       toSec("minutes", 3),
     );
-    this.mailProvider.send(
+    await this.mailProvider.send(
       registerDto.email,
       "Verification Code:",
       otpTemplate(code),
@@ -91,17 +92,13 @@ class AuthService {
     const user = await this.userRepo.findByEmail(enable2FactorAuthDto.email);
     // if user there -> error
     if (!user) throw userDoesNotExist;
-    // if user verifired -> error
-    if (user.isVerified) throw userAlreadyVerified;
     // if not found the otp -> error
-    const otp = await cacheProvider.get(
-      `${this.sendOtpKey}:${enable2FactorAuthDto.email}`,
-    );
+    const otp = await cacheProvider.get(`${this.sendOtpKey}${user._id}`);
 
     if (!otp) throw otpIsExpired;
 
     if (otp !== enable2FactorAuthDto.code) throw invalidCode;
-    await cacheProvider.del(`${this.sendOtpKey}:${enable2FactorAuthDto.email}`);
+    await cacheProvider.del(`${this.sendOtpKey}${user._id}`);
     await this.userRepo.update(
       { email: enable2FactorAuthDto.email },
       { is2FactorAuthEnabled: true },
@@ -117,54 +114,35 @@ class AuthService {
     );
     // if user there -> error
     if (!user) throw userDoesNotExist;
-    // if user verifired -> error
-    if (user.isVerified) throw userAlreadyVerified;
     // if not found the otp -> error
-    const otp = await cacheProvider.get(
-      `${this.sendOtpKey}:${verify2FactorAuthCodeToLoginDto.email}`,
-    );
+    const otp = await cacheProvider.get(`${this.sendOtpKey}${user._id}`);
 
     if (!otp) throw otpIsExpired;
 
-    if (otp !== verify2FactorAuthCodeToLoginDto.email) throw invalidCode;
-    await cacheProvider.del(
-      `${this.sendOtpKey}:${verify2FactorAuthCodeToLoginDto.email}`,
-    );
-    const token = generateToken({ id: user._id, name: user.userName });
-    return token;
+    if (otp !== verify2FactorAuthCodeToLoginDto.code) throw invalidCode;
+    await cacheProvider.del(`${this.sendOtpKey}${user._id}`);
+    return issueTokens(user);
   };
 
   login = async (loginDto: LoginDTO) => {
     const user = await this.userRepo.findByEmail(loginDto.email);
-    if (!user) throw userDoesNotExist;
+    if (!user) throw invalidCredentials;
+    if (user.provider !== Provider.LOCAL) throw invalidCredentials;
     if (!user.isVerified) throw userIsNotVerified;
     const match = await comparePassword(loginDto.password, user.password);
     if (!match) throw invalidCredentials;
 
     if (user.is2FactorAuthEnabled) {
-      const otp = await generateOTP();
+      const otp = generateOTP();
       await cacheProvider.set(
-        `${this.sendOtpKey}:${user.email}`,
+        `${this.sendOtpKey}${user._id}`,
         otp,
         toSec("minutes", 3),
       );
-      await mailjetProvider.send(user.email, "2FA Code", otpTemplate(otp));
+      await this.mailProvider.send(user.email, "2FA Code", otpTemplate(otp));
       return;
     }
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      userName: user.userName,
-    });
-    const refreshToken = generateRefreshToken({
-      id: user.id,
-      email: user.email,
-      userName: user.userName,
-    });
-    return {
-      token,
-      refreshToken,
-    };
+    return issueTokens(user);
   };
 
   sendOTP = async (sendOTPDto: SendOTPDTO) => {
@@ -173,11 +151,11 @@ class AuthService {
     if (!user) throw userDoesNotExist;
     const code = generateOTP();
     await cacheProvider.set(
-      `${this.sendOtpKey}:${user._id}`,
+      `${this.sendOtpKey}${user._id}`,
       code,
       toSec("minutes", 3),
     );
-    this.mailProvider.send(user.email, "Otp:", otpTemplate(code));
+    await this.mailProvider.send(user.email, "Otp:", otpTemplate(code));
   };
   loginWithGoogle = async (idToken: string) => {
     // ? 1 - verify idToken
@@ -187,10 +165,7 @@ class AuthService {
     const user = await this.userRepo.findByEmail(payload.email as string);
     // ? if exist -> send Token
     if (user) {
-      return generateToken({
-        id: user.id,
-        email: user.email,
-      });
+      return issueTokens(user);
     }
     // ? if not -> create user and generate the token
     const createdUser = await this.userRepo.create({
@@ -199,33 +174,18 @@ class AuthService {
       provider: Provider.GOOGLE,
       isVerified: true,
     });
-    const token = generateToken({
-      id: createdUser.id,
-      email: createdUser.email,
-    });
-    const refreshToken = generateRefreshToken({
-      id: createdUser.id,
-      email: createdUser.email,
-    });
-    return {
-      token,
-      refreshToken,
-    };
+    return issueTokens(createdUser);
   };
   refreshToken = async (token: string) => {
-    const payload = jwt.verify(token, env.jwt.refreshSecret) as JwtPayload;
-    const accessToken = generateToken({
-      sub: payload.sub,
-      userName: payload.userName,
-    });
-    const refreshToken = generateRefreshToken({
-      sub: payload.sub,
-      userName: payload.userName,
-    });
-    return {
-      token,
-      refreshToken,
-    };
+    let payload: JwtPayload;
+    try {
+      payload = jwt.verify(token, env.jwt.refreshSecret) as JwtPayload;
+    } catch {
+      throw new AppError("Invalid or expired refresh token", 401);
+    }
+    const user = await this.userRepo.getOne({ _id: payload.id });
+    if (!user) throw new AppError("Invalid or expired refresh token", 401);
+      return issueTokens(user);
   };
 }
 export const authService = new AuthService();
