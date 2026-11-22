@@ -119,5 +119,19 @@ class AuthController {
       next(error);
     }
   }
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+const { access_token, refreshToken_token } = req.cookies;
+      if (access_token) await authService.logout(access_token);
+      if (refreshToken_token) await authService.logout(refreshToken_token);
+      res.clearCookie("access_token");
+      res.clearCookie("refreshToken_token");
+      res
+        .status(200)
+        .json({ message: "Logged Out Successfully", success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 export const authController = new AuthController();

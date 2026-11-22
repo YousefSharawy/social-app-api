@@ -187,5 +187,10 @@ class AuthService {
     if (!user) throw new AppError("Invalid or expired refresh token", 401);
       return issueTokens(user);
   };
+  logout = async (token:string) => {
+    const {jti,exp} = jwt.decode(token) as JwtPayload;
+    const secondsLeft = exp! - Math.floor(toSec("milliseconds", Date.now()));
+      await cacheProvider.set(`revoked:${jti}`, "1", secondsLeft);
+  }
 }
 export const authService = new AuthService();
