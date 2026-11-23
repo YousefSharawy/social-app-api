@@ -3,6 +3,9 @@ import { s3CloudProvider } from "../../../lib/cloud/init";
 import { ICloudProvider } from "../../../pkg/cloud/cloud.interface";
 import userRepo from "../repo/user.repo";
 import { AppError } from "../../../pkg/error/error";
+import { userDoesNotExist } from "../error";
+import { Types } from "mongoose";
+import { UpdateProfileDto } from "../dto/dto";
 
 class UserService {
   private readonly cloudProvider: ICloudProvider = s3CloudProvider;
@@ -31,8 +34,35 @@ class UserService {
       { $unset: { profilePicturePath: 1 } },
     );
   };
-  generatePresignedUrl = async (file: Partial<Express.Multer.File>, userId: string) => {
-   return await this.cloudProvider.generatePresignedUrl(file, `users/${userId}`);
+  generatePresignedUrl = async (
+    file: Partial<Express.Multer.File>,
+    userId: string,
+  ) => {
+    return await this.cloudProvider.generatePresignedUrl(
+      file,
+      `users/${userId}`,
+    );
+  };
+  getMyProfile = async (id: string) => {
+    const user = await this.userRepo.getOne(
+      { _id: id, isDeleted: false },
+      "email userName bio gender profilePicturePath",
+    );
+    if (!user) throw userDoesNotExist;
+    return user;
+  };
+  updateProfile = async (id: string, updateProfileDto: UpdateProfileDto) => {
+    const updateUser = await this.userRepo.update(
+      { _id: id, isDeleted: false },
+      updateProfileDto,
+      {
+        new: true,
+        runValidators: true,
+        projection: "-password -__v",
+      },
+    );
+    if (!updateUser) throw userDoesNotExist;
+    return updateUser;
   };
 }
 

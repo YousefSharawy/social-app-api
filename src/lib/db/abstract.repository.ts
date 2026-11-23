@@ -1,4 +1,4 @@
-import { Model, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
+import { Model, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
 //contract
 export abstract class AbstractRepository<T> {
   constructor(private readonly model: Model<T>) {}
@@ -16,7 +16,7 @@ export abstract class AbstractRepository<T> {
     return await this.model.deleteOne({ _id: id });
   }
 
- async getOne(filter:QueryFilter<T>){
-  return await this.model.findOne(filter);
+ async getOne(filter:QueryFilter<T>,projection?: ProjectionType<T>){
+  return await this.model.findOne(filter,projection);
  }
 }

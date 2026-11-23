@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import userService from "../service/user.service";
+import { error } from "console";
 
 class UserControlelr {
   private readonly userService = userService;
@@ -40,21 +41,47 @@ class UserControlelr {
     next: NextFunction,
   ) => {
     try {
-        const {fileName , contentType} = req.body;
-     const url = await this.userService.generatePresignedUrl(
-       {
-        mimetype : contentType,
-        originalname : fileName
-       },
-       req.user?._id
+      const { fileName, contentType } = req.body;
+      const url = await this.userService.generatePresignedUrl(
+        {
+          mimetype: contentType,
+          originalname: fileName,
+        },
+        req.user?._id,
       );
-      res
-        .status(200)
-        .json({
-          message: "Url has been generated successfully",
-          success: true,
-          date : url
-        });
+      res.status(200).json({
+        message: "Url has been generated successfully",
+        success: true,
+        date: url,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  getMyProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const profile = await userService.getMyProfile(req.user?.id);
+      res.status(200).json({
+        message: "User profile has been retrieved successfully",
+        success: true,
+        profile: profile,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+    const { userName, bio } = req.body;
+    try {
+      const updatedUser = await userService.updateProfile(req.user?.id, {
+        userName,
+        bio,
+      });
+      res.status(200).json({
+        message: "User profile has been updated successfully",
+        success: true,
+        profile: updatedUser,
+      });
     } catch (error) {
       next(error);
     }

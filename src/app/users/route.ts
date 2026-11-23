@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { uploadSingle } from "../../lib/media/multer";
 import userController from "./controller/user.controller";
+import { guard } from "../../lib/auth/guard";
 
 export const userRouter = Router();
 
@@ -14,4 +15,6 @@ userRouter.delete(
   userController.uploadProfilePicture,
 );
 
-userRouter.post('/get-presigned-url',userController.generatePresignedUrl)
+userRouter.post('/get-presigned-url',userController.generatePresignedUrl);
+userRouter.get("/me", guard, userController.getMyProfile);
+userRouter.patch("/me", guard, userController.updateProfile);

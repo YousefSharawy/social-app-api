@@ -11,6 +11,7 @@ export interface IUser {
   isVerified?: boolean;
   is2FactorAuthEnabled?: boolean,
   profilePicturePath : string,
+  bio? : string,
 }
 
 const schema = new Schema<IUser>({
@@ -57,5 +58,11 @@ const schema = new Schema<IUser>({
     default: false,
   },
   profilePicturePath : String,
+  bio:{
+    type:String,
+    default:'',
+    maxlength:100,
+    trim:true,
+  }
 });
 export const User = model("User", schema);
