@@ -108,5 +108,13 @@ class UserControlelr {
       next(error);
     }
   };
+  searchUsers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const users = await this.userService.searchUsers(req.query.q as string);
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
 }
 export default new UserControlelr();

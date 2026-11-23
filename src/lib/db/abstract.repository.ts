@@ -19,4 +19,7 @@ export abstract class AbstractRepository<T> {
  async getOne(filter:QueryFilter<T>,projection?: ProjectionType<T>){
   return await this.model.findOne(filter,projection);
  }
+ async getAll(filter:QueryFilter<T>,projection?: ProjectionType<T>){
+  return await this.model.find(filter,projection).limit(20);
+ }
 }

@@ -90,7 +90,8 @@ class UserService {
   };
   unfollowUser = async (myId: string, targetId: string) => {
     if (!Types.ObjectId.isValid(targetId)) throw userDoesNotExist;
-    if (myId === targetId) throw new AppError("You can't unfollow yourself", 400);
+    if (myId === targetId)
+      throw new AppError("You can't unfollow yourself", 400);
     const target = await this.userRepo.getOne(
       { _id: targetId, isDeleted: false },
       "_id",
@@ -112,6 +113,16 @@ class UserService {
         $pull: { followers: myId },
       },
     );
+  };
+  searchUsers = async (q: string) => {
+    const users = this.userRepo.getAll(
+      {
+        userName: { $regex: q, $options: "i" },
+        isDeleted: false,
+      },
+      "userName bio profilePicturePath",
+    );
+    return users;
   };
 }
 
