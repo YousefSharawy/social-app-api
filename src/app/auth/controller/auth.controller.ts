@@ -121,7 +121,7 @@ class AuthController {
   }
   async logout(req: Request, res: Response, next: NextFunction) {
     try {
-const { access_token, refreshToken_token } = req.cookies;
+      const { access_token, refreshToken_token } = req.cookies;
       if (access_token) await authService.logout(access_token);
       if (refreshToken_token) await authService.logout(refreshToken_token);
       res.clearCookie("access_token");
@@ -129,6 +129,23 @@ const { access_token, refreshToken_token } = req.cookies;
       res
         .status(200)
         .json({ message: "Logged Out Successfully", success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async forgtPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {email} = req.body;
+      await authService.forgetPassword(email);
+      res.status(200).json({ message: "Code sent successfully to your email", success: true });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      await authService.resetPassword(req.body);
+      res.status(200).json({ message: "Your password has been reset", success: true });
     } catch (error) {
       next(error);
     }

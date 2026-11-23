@@ -29,3 +29,9 @@ export interface Verify2FactorAuthCodeToLoginDTO {
     email:string,
     code:string,
 }
+export interface ResetPasswordDTO {
+    email:string,
+    code:string,
+    password:string,
+    
+}

@@ -4,6 +4,7 @@ import {
   Enable2FactorAuthDTO,
   LoginDTO,
   RegisterDTO,
+  ResetPasswordDTO,
   SendOTPDTO,
   Verify2FactorAuthCodeToLoginDTO,
   VerifyAccountDTO,
@@ -183,16 +184,31 @@ class AuthService {
     } catch {
       throw new AppError("Invalid or expired refresh token", 401);
     }
-    const revoked = await cacheProvider.get(`revoked:${payload.jti}`); 
+    const revoked = await cacheProvider.get(`revoked:${payload.jti}`);
     if (revoked) throw new AppError("Token has been revoked", 401);
     const user = await this.userRepo.getOne({ _id: payload.id });
     if (!user) throw new AppError("Invalid or expired refresh token", 401);
-      return issueTokens(user);
+    return issueTokens(user);
   };
-  logout = async (token:string) => {
-    const {jti,exp} = jwt.decode(token) as JwtPayload;
+  logout = async (token: string) => {
+    const { jti, exp } = jwt.decode(token) as JwtPayload;
     const secondsLeft = exp! - Math.floor(toSec("milliseconds", Date.now()));
-      await cacheProvider.set(`revoked:${jti}`, "1", secondsLeft);
-  }
+    await cacheProvider.set(`revoked:${jti}`, "1", secondsLeft);
+  };
+  forgetPassword = async (email: string) => {
+    const user = await this.userRepo.findByEmail(email);
+    if (!user) throw invalidCredentials;
+    await this.sendOTP({ email });
+  };
+  resetPassword = async (resetPasswordDto: ResetPasswordDTO) => {
+    const user = await this.userRepo.findByEmail(resetPasswordDto.email);
+    if (!user) throw invalidCredentials;
+    const cachedCode = await cacheProvider.get(`${this.sendOtpKey}${user._id}`);
+    if (!cachedCode) throw otpIsExpired;
+    if (resetPasswordDto.code !== cachedCode) throw invalidCode;
+    const hashed = await hashPassword(resetPasswordDto.password);
+    await this.userRepo.update({ _id: user._id }, { password: hashed });
+    await cacheProvider.del(`${this.sendOtpKey}${user._id}`);
+  };
 }
 export const authService = new AuthService();

@@ -19,3 +19,5 @@ authRouter.post("/2fa/enable", authController.enable2FactorAuth);
 authRouter.post("/2fa/verify", authController.verify2FactorAuthCodeToLogin);
 
 authRouter.post("/logout", guard, authController.logout);
+authRouter.post("/forget-password", authController.forgtPassword);
+authRouter.post("/reset-password", authController.resetPassword);
