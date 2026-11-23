@@ -60,7 +60,7 @@ class UserControlelr {
   };
   getMyProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const profile = await userService.getMyProfile(req.user?.id);
+      const profile = await this.userService.getMyProfile(req.user?.id);
       res.status(200).json({
         message: "User profile has been retrieved successfully",
         success: true,
@@ -73,7 +73,7 @@ class UserControlelr {
   updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     const { userName, bio } = req.body;
     try {
-      const updatedUser = await userService.updateProfile(req.user?.id, {
+      const updatedUser = await this.userService.updateProfile(req.user?.id, {
         userName,
         bio,
       });
@@ -81,6 +81,28 @@ class UserControlelr {
         message: "User profile has been updated successfully",
         success: true,
         profile: updatedUser,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  followUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    try {
+        await this.userService.followUser(req.user?.id,req.params.id);
+      res.status(200).json({
+        message: "User followed successfully",
+        success: true,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  unfollowUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    try {
+        await this.userService.unfollowUser(req.user?.id,req.params.id);
+      res.status(200).json({
+        message: "User unfollowed successfully",
+        success: true,
       });
     } catch (error) {
       next(error);

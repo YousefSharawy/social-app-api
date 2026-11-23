@@ -64,6 +64,55 @@ class UserService {
     if (!updateUser) throw userDoesNotExist;
     return updateUser;
   };
+  followUser = async (myId: string, targetId: string) => {
+    if (!Types.ObjectId.isValid(targetId)) throw userDoesNotExist;
+    if (myId === targetId) throw new AppError("You can't follow yourself", 400);
+    const target = await this.userRepo.getOne(
+      { _id: targetId, isDeleted: false },
+      "_id",
+    );
+    if (!target) throw userDoesNotExist;
+    const me = await this.userRepo.update(
+      { _id: myId, following: { $ne: targetId } },
+      {
+        $addToSet: { following: targetId },
+      },
+    );
+    if (!me) throw new AppError("You already follow this user", 409);
+    await this.userRepo.update(
+      {
+        _id: targetId,
+      },
+      {
+        $addToSet: { followers: myId },
+      },
+    );
+  };
+  unfollowUser = async (myId: string, targetId: string) => {
+    if (!Types.ObjectId.isValid(targetId)) throw userDoesNotExist;
+    if (myId === targetId) throw new AppError("You can't unfollow yourself", 400);
+    const target = await this.userRepo.getOne(
+      { _id: targetId, isDeleted: false },
+      "_id",
+    );
+    if (!target) throw userDoesNotExist;
+
+    const me = await this.userRepo.update(
+      { _id: myId, following: targetId },
+      {
+        $pull: { following: targetId },
+      },
+    );
+    if (!me) throw new AppError("You don\'t follow this user", 400);
+    await this.userRepo.update(
+      {
+        _id: targetId,
+      },
+      {
+        $pull: { followers: myId },
+      },
+    );
+  };
 }
 
 export default new UserService();

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 import { Gender, Provider } from "../../../lib/enum/enum";
 
 export interface IUser {
@@ -12,6 +12,8 @@ export interface IUser {
   is2FactorAuthEnabled?: boolean,
   profilePicturePath : string,
   bio? : string,
+  followers : Types.ObjectId[];
+  following : Types.ObjectId[];
 }
 
 const schema = new Schema<IUser>({
@@ -63,6 +65,19 @@ const schema = new Schema<IUser>({
     default:'',
     maxlength:100,
     trim:true,
-  }
+  },
+  followers: [
+    {
+      type:Schema.Types.ObjectId,
+      ref:'User'
+    }
+  ],
+  following: [
+    {
+      type:Schema.Types.ObjectId,
+      ref:'User'
+    }
+  ],
+  
 });
 export const User = model("User", schema);
