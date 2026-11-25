@@ -14,7 +14,7 @@ class UserService {
   uploadProfilePicture = async (file: Express.Multer.File, userID: string) => {
     file.buffer = readFileSync(file.path);
     const key = await this.cloudProvider.uploadFile(file, `users/${userID}`);
-    this.userRepo.update(
+    await this.userRepo.update(
       {
         _id: userID,
       },
@@ -115,13 +115,26 @@ class UserService {
     );
   };
   searchUsers = async (q: string) => {
+    if(!q?.trim()) return []; 
     const users = this.userRepo.getAll(
       {
         userName: { $regex: q, $options: "i" },
         isDeleted: false,
       },
+      {},
       "userName bio profilePicturePath",
     );
+    return users;
+  };
+  getUserSuggestions = async (userId:string) => { 
+    const user = await this.userRepo.getOne({_id:userId,isDeleted:false}); 
+    if(!user) throw userDoesNotExist;
+
+    const users = await this.userRepo.getAll({
+      _id: {$nin:[...user.following,user._id]} ,
+      isDeleted:false},{
+
+    },"userName profilePicturePath gender bio");
     return users;
   };
 }

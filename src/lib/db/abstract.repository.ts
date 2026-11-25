@@ -1,4 +1,11 @@
-import { Model, ProjectionType, QueryFilter, QueryOptions, Types, UpdateQuery } from "mongoose";
+import {
+  Model,
+  ProjectionType,
+  QueryFilter,
+  QueryOptions,
+  Types,
+  UpdateQuery,
+} from "mongoose";
 //contract
 export abstract class AbstractRepository<T> {
   constructor(private readonly model: Model<T>) {}
@@ -16,10 +23,14 @@ export abstract class AbstractRepository<T> {
     return await this.model.deleteOne({ _id: id });
   }
 
- async getOne(filter:QueryFilter<T>,projection?: ProjectionType<T>){
-  return await this.model.findOne(filter,projection);
- }
- async getAll(filter:QueryFilter<T>,projection?: ProjectionType<T>){
-  return await this.model.find(filter,projection).limit(20);
- }
+  async getOne(filter: QueryFilter<T>, projection?: ProjectionType<T>) {
+    return await this.model.findOne(filter, projection);
+  }
+  async getAll(
+    filter: QueryFilter<T>,
+    options?: QueryOptions<T>,
+    projection?: ProjectionType<T>,
+  ) {
+    return await this.model.find(filter,projection,options).limit(20);
+  }
 }

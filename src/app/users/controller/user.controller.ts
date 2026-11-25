@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import userService from "../service/user.service";
-import { error } from "console";
 
-class UserControlelr {
+class UserController {
   private readonly userService = userService;
   uploadProfilePicture = async (
     req: Request,
@@ -47,12 +46,12 @@ class UserControlelr {
           mimetype: contentType,
           originalname: fileName,
         },
-        req.user?._id,
+        req.user?.id,
       );
       res.status(200).json({
         message: "Url has been generated successfully",
         success: true,
-        date: url,
+        data: url,
       });
     } catch (error) {
       next(error);
@@ -111,10 +110,18 @@ class UserControlelr {
   searchUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await this.userService.searchUsers(req.query.q as string);
-    res.status(200).json({ success: true, data: users });
+    res.status(200).json({success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
+  getUserSuggestions = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userSuggestions = await this.userService.getUserSuggestions(req.user?.id);
+    res.status(200).json({ success: true, data: userSuggestions });
   } catch (error) {
     next(error);
   }
 };
 }
-export default new UserControlelr();
+export default new UserController();
