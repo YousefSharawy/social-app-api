@@ -24,3 +24,4 @@ userRouter.post("/:id/follow", guard, userController.followUser);
 userRouter.delete("/:id/follow", guard, userController.unfollowUser);
 userRouter.get("/search", guard, userController.searchUsers);
 userRouter.get('/suggestions', guard , userController.getUserSuggestions);
+userRouter.patch('/me/privacy', guard , userController.changeAccountPrivacy);

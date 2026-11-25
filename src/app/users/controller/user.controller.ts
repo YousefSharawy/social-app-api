@@ -123,5 +123,13 @@ class UserController {
     next(error);
   }
 };
+  changeAccountPrivacy = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await this.userService.changeAccountPrivacy(req.user?.id);
+    res.status(200).json({ message : "user account privacy has been changed successfully",success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
 }
 export default new UserController();

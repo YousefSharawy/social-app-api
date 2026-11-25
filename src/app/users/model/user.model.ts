@@ -9,11 +9,12 @@ export interface IUser {
   gender?: number;
   isDeleted?: boolean;
   isVerified?: boolean;
-  is2FactorAuthEnabled?: boolean,
-  profilePicturePath : string,
-  bio? : string,
-  followers : Types.ObjectId[];
-  following : Types.ObjectId[];
+  is2FactorAuthEnabled?: boolean;
+  profilePicturePath: string;
+  bio?: string;
+  followers: Types.ObjectId[];
+  following: Types.ObjectId[];
+  isPrivate?: boolean;
 }
 
 const schema = new Schema<IUser>({
@@ -55,29 +56,32 @@ const schema = new Schema<IUser>({
     type: Boolean,
     default: false,
   },
-  is2FactorAuthEnabled:{
-     type: Boolean,
+  is2FactorAuthEnabled: {
+    type: Boolean,
     default: false,
   },
-  profilePicturePath : String,
-  bio:{
-    type:String,
-    default:'',
-    maxlength:100,
-    trim:true,
+  profilePicturePath: String,
+  bio: {
+    type: String,
+    default: "",
+    maxlength: 100,
+    trim: true,
   },
   followers: [
     {
-      type:Schema.Types.ObjectId,
-      ref:'User'
-    }
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   ],
   following: [
     {
-      type:Schema.Types.ObjectId,
-      ref:'User'
-    }
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   ],
-  
+  isPrivate: {
+    type: Boolean,
+    default: false,
+  },
 });
 export const User = model("User", schema);

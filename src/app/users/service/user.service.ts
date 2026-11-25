@@ -46,7 +46,7 @@ class UserService {
   getMyProfile = async (id: string) => {
     const user = await this.userRepo.getOne(
       { _id: id, isDeleted: false },
-      "email userName bio gender profilePicturePath",
+      "email userName bio gender profilePicturePath isPrivate",
     );
     if (!user) throw userDoesNotExist;
     return user;
@@ -115,7 +115,7 @@ class UserService {
     );
   };
   searchUsers = async (q: string) => {
-    if(!q?.trim()) return []; 
+    if (!q?.trim()) return [];
     const users = this.userRepo.getAll(
       {
         userName: { $regex: q, $options: "i" },
@@ -126,16 +126,32 @@ class UserService {
     );
     return users;
   };
-  getUserSuggestions = async (userId:string) => { 
-    const user = await this.userRepo.getOne({_id:userId,isDeleted:false}); 
-    if(!user) throw userDoesNotExist;
+  getUserSuggestions = async (userId: string) => {
+    const user = await this.userRepo.getOne({ _id: userId, isDeleted: false });
+    if (!user) throw userDoesNotExist;
 
-    const users = await this.userRepo.getAll({
-      _id: {$nin:[...user.following,user._id]} ,
-      isDeleted:false},{
-
-    },"userName profilePicturePath gender bio");
+    const users = await this.userRepo.getAll(
+      {
+        _id: { $nin: [...user.following, user._id] },
+        isDeleted: false,
+      },
+      {},
+      "userName profilePicturePath gender bio",
+    );
     return users;
+  };
+  changeAccountPrivacy = async (userId: string) => {
+    const userPrivacy = await this.userRepo.getOne({ _id: userId, isDeleted: false } , "isPrivate");
+    if (!userPrivacy) throw userDoesNotExist;
+    const updatedUser = await this.userRepo.update(
+      { _id: userId, isDeleted: false },
+      { isPrivate: !userPrivacy.isPrivate },
+      {
+        returnDocument: "after",
+        projection : 'isPrivate'
+      },
+    );
+    return updatedUser;
   };
 }
 
