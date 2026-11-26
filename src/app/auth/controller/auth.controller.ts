@@ -10,7 +10,7 @@ export class AuthController {
   constructor(
     @inject(TOKENS.AuthService)private readonly authService : AuthService,
   ){};
-  async register(req: Request, res: Response, next: NextFunction) {
+   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await this.authService.register(req.body);
       res.status(201).json({
@@ -21,9 +21,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async verifyAccount(req: Request, res: Response, next: NextFunction) {
+  verifyAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await this.authService.verifyAccount(req.body);
       res.status(200).json({
@@ -34,9 +34,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async sendOTP(req: Request, res: Response, next: NextFunction) {
+  sendOTP = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.authService.sendOTP(req.body);
       res.status(200).json({
@@ -46,9 +46,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async login(req: Request, res: Response, next: NextFunction) {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.login(req.body);
       // 2FA enabled -> service sends a code and returns nothing
@@ -68,9 +68,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async enable2FactorAuth(req: Request, res: Response, next: NextFunction) {
+  enable2FactorAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.authService.enable2FactorAuth(req.body);
       res.status(200).json({
@@ -80,13 +80,13 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async verify2FactorAuthCodeToLogin(
+  verify2FactorAuthCodeToLogin = async (
     req: Request,
     res: Response,
     next: NextFunction,
-  ) {
+  ) => {
     try {
       const token = await this.authService.verify2FactorAuthCodeToLogin(req.body);
       res.status(200).json({
@@ -97,9 +97,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async loginWithGoogle(req: Request, res: Response, next: NextFunction) {
+  loginWithGoogle = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.loginWithGoogle(req.body.idToken);
       res.status(200).json({
@@ -110,9 +110,9 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
+  };
 
-  async refreshToken(req: Request, res: Response, next: NextFunction) {
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.cookies.refreshToken_token ?? req.body.refreshToken;
       const result = await this.authService.refreshToken(token);
@@ -125,8 +125,8 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
-  async logout(req: Request, res: Response, next: NextFunction) {
+  };
+  logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { access_token, refreshToken_token } = req.cookies;
       if (access_token) await this.authService.logout(access_token);
@@ -139,8 +139,8 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
-  async forgtPassword(req: Request, res: Response, next: NextFunction) {
+  };
+  forgtPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {email} = req.body;
       await this.authService.forgetPassword(email);
@@ -148,13 +148,13 @@ export class AuthController {
     } catch (error) {
       next(error);
     }
-  }
-  async resetPassword(req: Request, res: Response, next: NextFunction) {
+  };
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       await this.authService.resetPassword(req.body);
       res.status(200).json({ message: "Your password has been reset", success: true });
     } catch (error) {
       next(error);
     }
-  }
+  };
 }

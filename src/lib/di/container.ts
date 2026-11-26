@@ -9,18 +9,24 @@ import { UserController } from "../../app/users/controller/user.controller";
 import { s3CloudProvider } from "../cloud/init";
 import { cacheProvider } from "../cache/init";
 import { mailjetProvider } from "../email/init";
+import { PostRepo } from "../../app/posts/repo/post.repo";
+import { PostService } from "../../app/posts/service/post.service";
+import { PostController } from "../../app/posts/controller/post.controller";
 
 // Repos
 container.registerSingleton<AuthRepo>(TOKENS.AuthRepo, AuthRepo);
 container.registerSingleton<UserRepo>(TOKENS.UserRepo, UserRepo);
+container.registerSingleton<PostRepo>(TOKENS.PostRepo, PostRepo);
 
 // Services
 container.registerSingleton<AuthService>(TOKENS.AuthService, AuthService);
 container.registerSingleton<UserService>(TOKENS.UserService, UserService);
+container.registerSingleton<PostService>(TOKENS.PostService, PostService);
 
 //Controller
 container.registerSingleton<AuthController>(TOKENS.AuthController, AuthController);
 container.registerSingleton<UserController>(TOKENS.UserController, UserController);
+container.registerSingleton<PostController>(TOKENS.PostController, PostController);
 
 // utils
 container.registerInstance(TOKENS.CacheProvider ,cacheProvider);
