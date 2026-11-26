@@ -1,4 +1,6 @@
-class AuthRepo{
+import { injectable } from "tsyringe";
+
+@injectable()
+export class AuthRepo{
     
 }
-// export default new AuthRepo();

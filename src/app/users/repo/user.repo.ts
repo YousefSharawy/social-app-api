@@ -1,7 +1,9 @@
 import { Types } from "mongoose";
 import { IUser, User } from "../model/user.model";
 import { AbstractRepository } from "../../../lib/db/abstract.repository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class UserRepo extends AbstractRepository <IUser> {
   constructor(){
     super(User);
@@ -10,4 +12,3 @@ export class UserRepo extends AbstractRepository <IUser> {
     return await User.findOne({email:email});
    }
 }
-export default new UserRepo();

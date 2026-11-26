@@ -1,12 +1,12 @@
 import Mailjet from "node-mailjet";
-import { MailProvider } from "./mail.interface";
+import { INotificationProvider } from "./notification.interface";
 interface IMailJetConfig {
     apiKey:string,
     apiSecret:string,
     fromName:string,
     fromEmail:string,
 }
-export class MailjetProvider implements MailProvider {
+export class MailjetProvider implements INotificationProvider {
     private client: Mailjet;
     private fromName :string;
     private fromEmail:string;
@@ -19,7 +19,7 @@ export class MailjetProvider implements MailProvider {
         this.fromEmail = config.fromEmail;
     };
 
-    async send(email:string, subject:string , html:string){
+    async send(to:string, title:string , body:string){
          await this.client.post('send', { version: 'v3.1' }).request({
             Messages: [
                 {
@@ -29,11 +29,11 @@ export class MailjetProvider implements MailProvider {
                     },
                     To: [
                         {
-                            Email: email,
+                            Email: to,
                         },
                     ],
-                    Subject: subject,
-                    HTMLPart: html,
+                    Subject: title,
+                    HTMLPart: body,
                 },
             ],
         });

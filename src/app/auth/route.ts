@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { authController } from "./controller/auth.controller";
 import { guard } from "../../lib/auth/guard";
+import container from "../../lib/di/container";
+import { TOKENS } from "../../lib/di/tokens";
+import { AuthController } from "./controller/auth.controller";
 
 export const authRouter = Router();
-
+const authController = container.resolve<AuthController>(TOKENS.AuthController);
 // registration & email verification
 authRouter.post("/register", authController.register);
 authRouter.post("/verify-account", authController.verifyAccount);

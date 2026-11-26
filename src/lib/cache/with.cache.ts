@@ -1,6 +1,9 @@
 
 import { NextFunction,Response,Request } from 'express';
-import { cacheProvider } from './init.js';
+import { container } from 'tsyringe';
+import { TOKENS } from '../di/tokens';
+import { ICacheProvider } from '../../pkg/cache/cache.interface';
+const cacheProvider = container.resolve<ICacheProvider>(TOKENS.CacheProvider);
 export function withCache(ttl = 3600) {
     return async (req:Request, res:Response, next:NextFunction) => {
         const key = `${req.method}:${req.originalUrl}`;

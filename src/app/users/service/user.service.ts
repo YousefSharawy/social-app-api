@@ -1,15 +1,18 @@
 import { readFileSync } from "fs";
 import { s3CloudProvider } from "../../../lib/cloud/init";
 import { ICloudProvider } from "../../../pkg/cloud/cloud.interface";
-import userRepo from "../repo/user.repo";
 import { AppError } from "../../../pkg/error/error";
 import { userDoesNotExist } from "../error";
 import { Types } from "mongoose";
 import { UpdateProfileDto } from "../dto/dto";
-
-class UserService {
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../../../lib/di/tokens";
+import { UserRepo } from "../repo/user.repo";
+@injectable()
+export class UserService {
   private readonly cloudProvider: ICloudProvider = s3CloudProvider;
-  private readonly userRepo = userRepo;
+
+  constructor(@inject(TOKENS.UserRepo) private readonly userRepo: UserRepo) {}
 
   uploadProfilePicture = async (file: Express.Multer.File, userID: string) => {
     file.buffer = readFileSync(file.path);
@@ -141,18 +144,19 @@ class UserService {
     return users;
   };
   changeAccountPrivacy = async (userId: string) => {
-    const userPrivacy = await this.userRepo.getOne({ _id: userId, isDeleted: false } , "isPrivate");
+    const userPrivacy = await this.userRepo.getOne(
+      { _id: userId, isDeleted: false },
+      "isPrivate",
+    );
     if (!userPrivacy) throw userDoesNotExist;
     const updatedUser = await this.userRepo.update(
       { _id: userId, isDeleted: false },
       { isPrivate: !userPrivacy.isPrivate },
       {
         returnDocument: "after",
-        projection : 'isPrivate'
+        projection: "isPrivate",
       },
     );
     return updatedUser;
   };
 }
-
-export default new UserService();

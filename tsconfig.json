@@ -12,6 +12,10 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noEmitOnError": true,
+    
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
@@ -19,8 +23,6 @@
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
-    
-    "noEmitOnError": true,
   },
   "include":[
     "src"

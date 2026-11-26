@@ -1,5 +1,4 @@
 import { IUser } from "../../users/model/user.model";
-import userRepo, { UserRepo } from "../../users/repo/user.repo";
 import {
   Enable2FactorAuthDTO,
   LoginDTO,
@@ -20,9 +19,8 @@ import { comparePassword, hashPassword } from "../../../pkg/utils/hash/hash";
 import { generateOTP } from "../../../pkg/utils/otp";
 import { cacheProvider } from "../../../lib/cache/init";
 import { toSec } from "../../../pkg/utils/convert_time_units";
-import { mailjetProvider } from "../../../lib/email/init";
 import { otpTemplate } from "../../../lib/email/otp.template";
-import { MailProvider } from "../../../pkg/mail/mail.interface";
+import { INotificationProvider } from "../../../pkg/notification/notification.interface";
 import { invalidCode, noPayload, otpIsExpired } from "../error";
 import { issueTokens } from "../../../lib/token/token";
 import { verifyGoogleToken } from "../../../lib/token/google.auth";
@@ -30,16 +28,19 @@ import { Provider } from "../../../lib/enum/enum";
 import { env } from "../../../lib/config/env";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../../pkg/error/error";
+import { inject, injectable } from "tsyringe";
+import { TOKENS } from "../../../lib/di/tokens";
+import { UserRepo } from "../../users/repo/user.repo";
 
-class AuthService {
-  // private authService: AuthService = authService;
-  private readonly userRepo: UserRepo = userRepo;
+@injectable()
+export class AuthService {
+  // private twoAuthVerificationKey = "2FA:";
   private sendOtpKey = "OTP:";
-  private twoAuthVerificationKey = "2FA:";
-  private readonly mailProvider: MailProvider;
-  constructor() {
-    this.mailProvider = mailjetProvider;
-  }
+
+  constructor(
+    @inject(TOKENS.UserRepo) private readonly userRepo: UserRepo,
+    @inject(TOKENS.MaijetProvider)private readonly mailProvider: INotificationProvider,
+  ) {}
   register = async (registerDto: RegisterDTO) => {
     // find user by emil
     const user = await this.userRepo.findByEmail(registerDto.email);
@@ -211,4 +212,3 @@ class AuthService {
     await cacheProvider.del(`${this.sendOtpKey}${user._id}`);
   };
 }
-export const authService = new AuthService();

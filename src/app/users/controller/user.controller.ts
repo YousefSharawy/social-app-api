@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import userService from "../service/user.service";
+import { inject, injectable } from "tsyringe";
+import { UserService } from "../service/user.service";
+import { TOKENS } from "../../../lib/di/tokens";
 
-class UserController {
-  private readonly userService = userService;
+@injectable()
+export class UserController {
+  constructor(
+    @inject(TOKENS.UserService) private readonly userService: UserService,
+  ) {}
   uploadProfilePicture = async (
     req: Request,
     res: Response,
@@ -85,9 +90,13 @@ class UserController {
       next(error);
     }
   };
-  followUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  followUser = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-        await this.userService.followUser(req.user?.id,req.params.id);
+      await this.userService.followUser(req.user?.id, req.params.id);
       res.status(200).json({
         message: "User followed successfully",
         success: true,
@@ -96,9 +105,13 @@ class UserController {
       next(error);
     }
   };
-  unfollowUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+  unfollowUser = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-        await this.userService.unfollowUser(req.user?.id,req.params.id);
+      await this.userService.unfollowUser(req.user?.id, req.params.id);
       res.status(200).json({
         message: "User unfollowed successfully",
         success: true,
@@ -108,28 +121,43 @@ class UserController {
     }
   };
   searchUsers = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const users = await this.userService.searchUsers(req.query.q as string);
-    res.status(200).json({success: true, data: users });
-  } catch (error) {
-    next(error);
-  }
-};
-  getUserSuggestions = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userSuggestions = await this.userService.getUserSuggestions(req.user?.id);
-    res.status(200).json({ success: true, data: userSuggestions });
-  } catch (error) {
-    next(error);
-  }
-};
-  changeAccountPrivacy = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = await this.userService.changeAccountPrivacy(req.user?.id);
-    res.status(200).json({ message : "user account privacy has been changed successfully",success: true, data: user });
-  } catch (error) {
-    next(error);
-  }
-};
+    try {
+      const users = await this.userService.searchUsers(req.query.q as string);
+      res.status(200).json({ success: true, data: users });
+    } catch (error) {
+      next(error);
+    }
+  };
+  getUserSuggestions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const userSuggestions = await this.userService.getUserSuggestions(
+        req.user?.id,
+      );
+      res.status(200).json({ success: true, data: userSuggestions });
+    } catch (error) {
+      next(error);
+    }
+  };
+  changeAccountPrivacy = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const user = await this.userService.changeAccountPrivacy(req.user?.id);
+      res
+        .status(200)
+        .json({
+          message: "user account privacy has been changed successfully",
+          success: true,
+          data: user,
+        });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
-export default new UserController();

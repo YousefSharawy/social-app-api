@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { uploadSingle } from "../../lib/media/multer";
-import userController from "./controller/user.controller";
 import { guard } from "../../lib/auth/guard";
+import { container } from "tsyringe";
+import { UserController } from "./controller/user.controller";
+import { TOKENS } from "../../lib/di/tokens";
 
 export const userRouter = Router();
-
+const userController = container.resolve<UserController>(TOKENS.UserController);
 userRouter.post(
   "/upload-profile-picture",
   guard,
