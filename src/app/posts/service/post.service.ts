@@ -11,11 +11,14 @@ export class PostService {
   constructor(
     @inject(TOKENS.PostRepo) private readonly postRepo: PostRepo,
     @inject(TOKENS.UserRepo) private readonly userRepo: UserRepo,
-) {}
-  createPost = async (createPostDto: CreatePostDTO) => {
-    const user = await this.userRepo.getOne({_id:createPostDto.userId});
-    if(!user) throw userDoesNotExist;
-    const createdPost = await this.postRepo.create(createPostDto);
+  ) {}
+  createPost = async (userId: string, createPostDto: CreatePostDTO) => {
+    const user = await this.userRepo.getOne({ _id: userId });
+    if (!user) throw userDoesNotExist;
+    const createdPost = await this.postRepo.create({
+      ...createPostDto,
+      userId: user._id,
+    });
     return createdPost;
   };
 }
