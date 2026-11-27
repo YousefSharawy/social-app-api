@@ -10,7 +10,8 @@ export class PostController {
   ) {}
    createPost =  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const post = await this.postService.createPost(req.user?.id,req.body);
+      const { content, allowComments } = req.body;
+      const post = await this.postService.createPost(req.user?.id,{content , allowComments});
       res.status(201).json({
         message: "Post Created Successfully",
         success: true,
